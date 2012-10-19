@@ -13,6 +13,10 @@ class Worker extends JavaScriptObject
    /*-{
       return this.username;
    }-*/;
+   public final native String getPassword()
+   /*-{
+      return this.password;
+   }-*/;
    public final native String getDepartment()
    /*-{
       return this.department;
