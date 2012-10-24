@@ -50,6 +50,7 @@ public class Sample implements EntryPoint, ClickHandler
    Button editSubmitButton = new Button ("Modify");
    Button deleteButton = new Button("Delete worker");
    Button loginButton = new Button("Login");
+   Button loginSubmitButton = new Button("Route");
    TextBox nameBox = new TextBox();
    TextBox userBox = new TextBox();
    PasswordTextBox passBox = new PasswordTextBox();
@@ -65,6 +66,7 @@ public class Sample implements EntryPoint, ClickHandler
       editButton.addClickHandler(this);
       deleteButton.addClickHandler(this);
       loginButton.addClickHandler(this);
+      loginSubmitButton.addClickHandler(this);
       
       String url = "http://localhost:3000/workers.json";
       getRequest(url);
@@ -126,6 +128,10 @@ public class Sample implements EntryPoint, ClickHandler
             postyRequest(url,encData);
             //Window.alert(encData);
       }
+      else if (source == loginButton)
+      {
+         showLoginForm("","",true);
+      }
    }
    private void postRequest(String url, String data)
    {
@@ -148,8 +154,12 @@ public class Sample implements EntryPoint, ClickHandler
                getRequest(url);
             }
          });
+      }  
+      catch (final Exception e) {
+         Window.alert(e.getMessage());
       }
-      private void postyRequest(String url, String data)
+   }
+    private void postyRequest(String url, String data)
       {
          final RequestBuilder rb =
             new RequestBuilder(RequestBuilder.POST,url);
@@ -166,7 +176,7 @@ public class Sample implements EntryPoint, ClickHandler
                public void onResponseReceived(final Request request,
                   final Response response)
                {
-                  String url = "http://localhost:3000/Sample.html";
+                  String url = "http://localhost:3000/workers/plain";
                   getRequest(url);
                }
             });
@@ -237,7 +247,7 @@ public class Sample implements EntryPoint, ClickHandler
       mainPanel.clear();
       mainPanel.add(editPanel);
    }
-   private void showEditForm(String userStr, String passStr, boolean editing)
+   private void showLoginForm(String userStr, String passStr, boolean editing)
    {
       VerticalPanel editPanel = new VerticalPanel();
       HorizontalPanel row1 = new HorizontalPanel();
