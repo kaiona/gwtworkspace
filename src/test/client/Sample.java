@@ -46,12 +46,15 @@ public class Sample implements EntryPoint, ClickHandler
    VerticalPanel mainPanel = new VerticalPanel();
    Button addButton = new Button("Add worker");
    Button addSubmitButton = new Button("Add");
+   Button editButton = new Button("Edit worker");
    Button editSubmitButton = new Button ("Modify");
+   Button deleteButton = new Button("Delete worker");
+   Button loginButton = new Button("Login");
    TextBox nameBox = new TextBox();
    TextBox userBox = new TextBox();
    PasswordTextBox passBox = new PasswordTextBox();
    TextBox deptBox = new TextBox();
-   Button editButton = new Button("Edit worker");
+   
    MyWorker selectedWorker;
    public void onModuleLoad()
    {
@@ -60,6 +63,9 @@ public class Sample implements EntryPoint, ClickHandler
       addSubmitButton.addClickHandler(this);
       editSubmitButton.addClickHandler(this);
       editButton.addClickHandler(this);
+      deleteButton.addClickHandler(this);
+      loginButton.addClickHandler(this);
+      
       String url = "http://localhost:3000/workers.json";
       getRequest(url);
    }
@@ -80,11 +86,45 @@ public class Sample implements EntryPoint, ClickHandler
          String url = "http://localhost:3000/workers/create";
          postRequest(url,encData);
       }
-      else if (source == editButton) {
-         String name = selectedWorker.name;
-         String username = selectedWorker.username;
-         String department = selectedWorker.department;
-         showEditForm(name,username,"",department,true);
+      else if (source == editButton)
+      {
+         showEditForm(selectedWorker.name,selectedWorker.username,""
+               ,selectedWorker.department,true);
+      }
+      else if (source == editSubmitButton) {
+         int id = selectedWorker.id;
+         String encData = URL.encode("name") + "=" +
+               URL.encode(nameBox.getText()) + "&" +
+               URL.encode("username") + "=" +
+               URL.encode(userBox.getText()) + "&" +
+               URL.encode("password") + "=" +
+               URL.encode(passBox.getText()) + "&" +
+               URL.encode("department") + "=" +
+               URL.encode(deptBox.getText()) + "&" +
+               URL.encode("id") + "=" +
+               URL.encode("" + id);
+            String url = "http://localhost:3000/workers/update";
+            postRequest(url,encData);
+            //Window.alert(encData);
+      }
+      else if (source == deleteButton) {
+         int id = selectedWorker.id;
+         String encData = URL.encode("id") + "=" +
+         URL.encode("" + id);
+         String url = "http://localhost:3000/workers/destroy";
+         postRequest(url,encData);
+      }
+      else if (source == loginButton) {
+         int id = selectedWorker.id;
+         String encData = URL.encode("username") + "=" +
+               URL.encode(userBox.getText()) + "&" +
+               URL.encode("password") + "=" +
+               URL.encode(passBox.getText()) + "&" +
+               URL.encode("id") + "=" +
+               URL.encode("" + id);
+            String url = "http://localhost:3000/workers/plain";
+            postyRequest(url,encData);
+            //Window.alert(encData);
       }
    }
    private void postRequest(String url, String data)
@@ -109,6 +149,28 @@ public class Sample implements EntryPoint, ClickHandler
             }
          });
       }
+      private void postyRequest(String url, String data)
+      {
+         final RequestBuilder rb =
+            new RequestBuilder(RequestBuilder.POST,url);
+         rb.setHeader("Content-type",
+                  "application/x-www-form-urlencoded");
+         try {
+            rb.sendRequest(data, new RequestCallback()
+            {
+               public void onError(final Request request,
+                  final Throwable exception)
+               {
+                  Window.alert(exception.getMessage());            
+               }
+               public void onResponseReceived(final Request request,
+                  final Response response)
+               {
+                  String url = "http://localhost:3000/Sample.html";
+                  getRequest(url);
+               }
+            });
+         }
       catch (final Exception e) {
          Window.alert(e.getMessage());
       }
@@ -164,7 +226,7 @@ public class Sample implements EntryPoint, ClickHandler
       Label deptLabel = new Label("Department: ");
       row4.add(deptLabel);
       row4.add(deptBox);
-      deptBox.setText(userStr);
+      deptBox.setText(deptStr);
       editPanel.add(row4);
       if(editing) {
          editPanel.add(editSubmitButton);
@@ -174,6 +236,22 @@ public class Sample implements EntryPoint, ClickHandler
       }
       mainPanel.clear();
       mainPanel.add(editPanel);
+   }
+   private void showEditForm(String userStr, String passStr, boolean editing)
+   {
+      VerticalPanel editPanel = new VerticalPanel();
+      HorizontalPanel row1 = new HorizontalPanel();
+      Label userLabel = new Label("Username: ");
+      row1.add(userLabel);
+      row1.add(userBox);
+      userBox.setText(userStr);
+      editPanel.add(row1);
+      HorizontalPanel row2 = new HorizontalPanel();
+      Label passLabel = new Label("Password: ");
+      row2.add(passLabel);
+      row2.add(passBox);
+      passBox.setText(passStr);
+      editPanel.add(row2);
    }
    private JsArray<Worker> getJSONData(String json)
    {
@@ -244,6 +322,7 @@ public class Sample implements EntryPoint, ClickHandler
       HorizontalPanel buttonPanel = new HorizontalPanel();
       buttonPanel.add(addButton);
       buttonPanel.add(editButton);
+      buttonPanel.add(deleteButton);
       mainPanel.clear();
       mainPanel.add(buttonPanel);
       mainPanel.add(table);
