@@ -23,6 +23,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
+import com.google.gwt.user.client.ui.Frame;
 
 public class Sample implements EntryPoint, ClickHandler
 {
@@ -66,10 +67,10 @@ public class Sample implements EntryPoint, ClickHandler
       editButton.addClickHandler(this);
       deleteButton.addClickHandler(this);
       loginButton.addClickHandler(this);
-      loginSubmitButton.addClickHandler(this);
+      showLoginForm();
       
-      String url = "http://localhost:3000/workers.json";
-      getRequest(url);
+      //String url = "http://localhost:3000/workers.json";
+      //getRequest(url);
    }
    public void onClick(ClickEvent e) {
       Object source = e.getSource();
@@ -117,20 +118,13 @@ public class Sample implements EntryPoint, ClickHandler
          postRequest(url,encData);
       }
       else if (source == loginButton) {
-         int id = selectedWorker.id;
          String encData = URL.encode("username") + "=" +
                URL.encode(userBox.getText()) + "&" +
                URL.encode("password") + "=" +
-               URL.encode(passBox.getText()) + "&" +
-               URL.encode("id") + "=" +
-               URL.encode("" + id);
-            String url = "http://localhost:3000/workers/plain";
+               URL.encode(passBox.getText());
+            String url = "http://localhost:3000/workers/login";
             postyRequest(url,encData);
             //Window.alert(encData);
-      }
-      else if (source == loginButton)
-      {
-         showLoginForm("","",true);
       }
    }
    private void postRequest(String url, String data)
@@ -176,8 +170,23 @@ public class Sample implements EntryPoint, ClickHandler
                public void onResponseReceived(final Request request,
                   final Response response)
                {
-                  String url = "http://localhost:3000/workers/plain";
-                  getRequest(url);
+                  //Window.alert(response.getText());
+                  int id = Integer.parseInt(response.getText());
+                  if (id == 1) {
+                     String url = "http://localhost:3000/workers.json";
+                     getRequest(url);
+                  }
+                  else if (id > 1) {
+                     Frame frame = new Frame("http://localhost:3000/workshops/summary");
+                     RootPanel.get().add(frame);
+                     mainPanel.clear();
+                     mainPanel.add(frame);
+                     //Window.alert("" + id);
+                  }
+                  else {
+                     userBox.setText("");
+                     passBox.setText("");
+                  }
                }
             });
          }
@@ -247,21 +256,23 @@ public class Sample implements EntryPoint, ClickHandler
       mainPanel.clear();
       mainPanel.add(editPanel);
    }
-   private void showLoginForm(String userStr, String passStr, boolean editing)
+   private void showLoginForm()
    {
       VerticalPanel editPanel = new VerticalPanel();
       HorizontalPanel row1 = new HorizontalPanel();
       Label userLabel = new Label("Username: ");
       row1.add(userLabel);
       row1.add(userBox);
-      userBox.setText(userStr);
       editPanel.add(row1);
       HorizontalPanel row2 = new HorizontalPanel();
       Label passLabel = new Label("Password: ");
       row2.add(passLabel);
       row2.add(passBox);
-      passBox.setText(passStr);
       editPanel.add(row2);
+      editPanel.add(loginButton);
+      mainPanel.clear();
+      mainPanel.add(editPanel);
+      
    }
    private JsArray<Worker> getJSONData(String json)
    {
